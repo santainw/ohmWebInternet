@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <meta charset="UTF-8">
+    <title>OhmShop</title>
+</head>
+<body style="background-image: url('../static/image/windowBack.jpg')">
+<div class="jumbotron jumbotron-fluid" style="text-align:center;background-color:black">
+  <div class="container" style="color:white;font-family:Frostbite Boss Fight">
+    <h1 class="display-1">Center shop</h1>
+    <p class="lead">Welcome</p>
+  </div>
+</div>
+
+        <form method="POST" action="http://localhost:9000/index">
+            <div class="form-group" style="text-align:center;font-family:Frostbite Boss Fight;color:white">
+                <label class="lead" >username : <input type="text" name="username" class="form-control"></label>
+                <br>
+                <label class="lead">password : <input type="password" name="password" class="form-control"></label>
+                <br>
+                <button type="submit" class="btn btn-secondary" ><h5 class="display-5">Login</h5></button>
+            </div>
+        </form>
+
+<div style="text-align:center;font-family:Frostbite Boss Fight;">
+    <form method="GET" action="http://localhost:9000/register">
+        <button type="submit" class="btn btn-secondary"><h5 class="display-5">Register</h5></button>
+    </form>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Modal body text goes here.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

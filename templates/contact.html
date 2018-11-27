@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OhmShop</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/sb-admin.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='fa-solid-900.woff2') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='fa-solid-900.woff') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='fa-solid-900.ttf') }}">
+</head>
+<body id="page-top" style="text-align:center;font-family:Frostbite Boss Fight;background-image: url('../static/image/background1.jpeg')">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">Center shop</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="http://localhost:9000/index" methods="get">Home
+              </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="http://localhost:9000/about" methods="get">About</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="http://localhost:9000/contact" methods="get">Contact
+              <span class="sr-only">(current)</span></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+<br>
+<br>
+<br>
+<br>
+<div class="row">
+    <div class="col-4"></div>
+    <div class="col-4">
+        <div class="card text-center" style="width: 18rem; text-align:center" >
+          <img class="card-img-top" src="../static/adminProfile/adminPic.jpg" alt="Card image cap">
+          <div class="card-body">
+            <h5 class="card-title">Welcome to my website</h5>
+            ---------CONTACT--------- <br>
+                nickname : Ohm<br>
+                email : thanakonngam@gmail.com<br>
+                facebook : Thanakon ngammuengpak<br>
+                line : ohm25818<br>
+                phone : 065-3966291<br>
+            </p>
+          </div>
+        </div>
+    </div>
+    <div class="col-4"></div>
+</div>
+
+<!-- Bootstrap core JavaScript-->
+        <script src="{{ url_for('static', filename='jquery/jquery.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+		<!-- Core plugin JavaScript-->
+		<script src="{{ url_for('static', filename='jquery-easing/jquery.easing.min.js') }}"></script>
+
+		<!-- Page level plugin JavaScript-->
+		<script src="{{ url_for('static', filename='chart.js/Chart.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='datatables/jquery.dataTables.js') }}"></script>
+		<script src="{{ url_for('static', filename='datatables/dataTables.bootstrap4.js') }}"></script>
+
+		<!-- Custom scripts for all pages-->
+		<script src="{{ url_for('static', filename='js/sb-admin.min.js') }}"></script>
+
+		<!-- Demo scripts for this page-->
+		<script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/demo/chart-area-demo.js') }}"></script>
+
+
+</body>
+</html>
