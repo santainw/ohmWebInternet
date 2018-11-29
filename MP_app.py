@@ -1,4 +1,5 @@
-import os
+# -*- encoding: utf-8 -*-
+import os, sys
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 
@@ -178,7 +179,7 @@ initIndexPostPage = '''<!DOCTYPE html>
             <a class="dropdown-item">
             <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Create post</button>
 
-                    
+
           <div class="dropdown-divider"></div>
               <h6 class="dropdown-header">sell record</h6>
             <a class="dropdown-item" href="404.html">
@@ -238,7 +239,7 @@ initIndexPostPage = '''<!DOCTYPE html>
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Create product</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -288,7 +289,7 @@ initIndexPostPage = '''<!DOCTYPE html>
 indexPostPage = []
 
 boxPostMem = []
-boxPost = ''' 
+boxPost = '''
 <br>
 <div class="container">
 
@@ -509,6 +510,3 @@ if __name__ == "__main__":
         os.remove(UPLOAD_FOLDER+"/"+name)
 
     app.run(debug=True, host="0.0.0.0", port=9000)
-
-
-
