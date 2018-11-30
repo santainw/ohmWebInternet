@@ -137,8 +137,20 @@ initIndexPostPage = '''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <title>OhmShop</title>
-    <link rel=stylesheet type=text/css href="static/css/bootstrap.min.css">
-    <link rel=stylesheet type=text/css href="static/css/sb-admin.css">
+    <!-- Bootstrap core CSS-->
+    <link href="./static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template-->
+    <link href="./static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+
+    <!-- Page level plugin CSS-->
+    <link href="./static/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="./static/css/sb-admin.css" rel="stylesheet">
+
+    <!-- <link rel=stylesheet type=text/css href="static/css/bootstrap.min.css">
+     <link rel=stylesheet type=text/css href="static/css/sb-admin.css">-->
 </head>
 <body id="page-top" style="text-align:center;font-family:Frostbite Boss Fight;background-image: url('../static/image/background1.jpeg')">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -217,23 +229,14 @@ initIndexPostPage = '''<!DOCTYPE html>
 
 
 <!-- Bootstrap core JavaScript-->
-        <script src="static/jquery/jquery.min.js"></script>
-		<script src="static/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-		<!-- Core plugin JavaScript-->
-		<script src="static/jquery-easing/jquery.easing.min.js"></script>
-
-		<!-- Page level plugin JavaScript-->
-		<script src="static/chart.js/Chart.min.js"></script>
-		<script src="static/datatables/jquery.dataTables.js"></script>
-		<script src="static/datatables/dataTables.bootstrap4.js"></script>
-
-		<!-- Custom scripts for all pages-->
-		<script src="static/js/sb-admin.min.js"></script>
-
-		<!-- Demo scripts for this page-->
-		<script src="static/js/demo/datatables-demo.js"></script>
-		<script src="static/js/demo/chart-area-demo.js"></script>
+<!-- Bootstrap core JavaScript-->
+<script src="./static/vendor/jquery/jquery.min.js"></script>
+<script src="./static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="./static/vendor/jquery-easing/jquery.easing.min.js"></script>
+<script src="./static/vendor/datatables/jquery.dataTables.js"></script>
+<script src="./static/vendor/datatables/dataTables.bootstrap4.js"></script>
+<script src="./static/js/sb-admin.min.js'"></script>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -247,7 +250,7 @@ initIndexPostPage = '''<!DOCTYPE html>
       <div class="modal-body">
         <form method=post enctype=multipart/form-data action="http://localhost:9000/postImage">
               <p><input type=file name=file>
-                 <input type=submit value=Upload>
+                 <input type=button value=Upload>
                  <br>
                  {}
             </form>
@@ -428,11 +431,11 @@ def register():
 
 @app.route("/postText", methods=['POST'])
 def postText():
-    name = request.form['name']
-    cost = request.form['cost']
-    telephone = request.form['telephone']
-    email = request.form['email']
-    data = request.form['message']
+    name = request.form['name'].encode('utf-8')
+    cost = request.form['cost'].encode('utf-8')
+    telephone = request.form['telephone'].encode('utf-8')
+    email = request.form['email'].encode('utf-8')
+    data = request.form['message'].encode('utf-8')
     boxPostMem.append(boxPost.format(imageMem[0], name, cost, data, telephone, email, name))
     sellMem.append("<tr><td>"+name+"</td></tr>")
     postMemory.append(data)
