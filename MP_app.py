@@ -1,7 +1,21 @@
 # -*- encoding: utf-8 -*-
+import logging
 import os, sys
 from flask import Flask, render_template, request, redirect, url_for, flash
 from werkzeug.utils import secure_filename
+from pymongo import MongoClient
+from gridfs import GridFS
+import base64
+import bcrypt
+salt = bcrypt.gensalt()
+
+client = MongoClient()
+client = MongoClient('localhost', 27017)
+client = MongoClient('mongodb://localhost:27017')
+db = client.webserver
+authen = db.authen
+product = db.product
+# from logging.config import dictConfig
 
 UPLOAD_FOLDER = './static/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -9,6 +23,26 @@ ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 authenNowMemory = []
 authenMemory = []
 postMemory = []
+
+tempSecurityLogin = []
+roundLogin = []
+
+
+# dictConfig({
+#     'version': 1,
+#     'formatters': {'default': {
+#         'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+#     }},
+#     'handlers': {'wsgi': {
+#         'class': 'logging.StreamHandler',
+#         'stream': 'ext://flask.logging.wsgi_errors_stream',
+#         'formatter': 'default'
+#     }},
+#     'root': {
+#         'level': 'INFO',
+#         'handlers': ['wsgi']
+#     }
+# })
 
 registerFailPage = '''<!DOCTYPE html>
 <html lang="en">
@@ -33,7 +67,7 @@ registerFailPage = '''<!DOCTYPE html>
     <br>
         <label class="lead">Password : <input type="password" name="password" class="form-control"></label>
     <br>
-        <label class="lead">Confirm Password : <input type="password" name="confirmpPassword" class="form-control"></label>
+        <label class="lead">Confirm Password : <input type="password" name="confirmPassword" class="form-control"></label>
     <br>
         <label class="lead">Name : <input type="text" name="name" class="form-control"></label>
     <br>
@@ -250,7 +284,7 @@ initIndexPostPage = '''<!DOCTYPE html>
       <div class="modal-body">
         <form method=post enctype=multipart/form-data action="http://localhost:9000/postImage">
               <p><input type=file name=file>
-                 <input type=button value=Upload>
+                 <input type=submit value=Upload>
                  <br>
                  {}
             </form>
@@ -352,45 +386,125 @@ def main():
     if (request.method == 'POST'):
         username = request.form['username']
         password = request.form['password']
-        if(username!=''
-                and username!= None
-                and password!=''
-                and password!= None):
-            for x in authenMemory:
-                if(x.get('username')==username and x.get('password')==password):
-                    authenNowMemory.append(x)
-                    if indexPostPage != []:
-                        indexPostPage.pop(0)
-                        indexPostPage.append(
-                            initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
-                                                     boxPostMem, "").replace("\\n", "").replace("['", "").replace("']", "").replace(
-                                "', '", "<br>"))
-
-                        return  indexPostPage[0]
+        firstLogin = authen.find_one({'username': request.form['username']})
+        print(firstLogin)
+        if(firstLogin!=None):
+            hashPass = bcrypt.hashpw(request.form['password'].encode(), salt)
+            if(tempSecurityLogin!=[]):
+                tempSecurityLogin.pop(0)
+            # print(hashPass==firstLogin['password'],hashPass,'----',firstLogin['password'])
+            if(bcrypt.checkpw(request.form['password'].encode(), firstLogin['password'])):
+                if(authenNowMemory!=[]):
+                    authenNowMemory.pop(0)
+                    authenNowMemory.append(firstLogin)
+                else:
+                    authenNowMemory.append(firstLogin)
+                if indexPostPage != []:
+                    indexPostPage.pop(0)
+                    indexPostPage.append(
+                        initIndexPostPage.format("", firstLogin['name'], firstLogin['address'],
+                                                 boxPostMem, "").replace("\\n", "").replace("['", "").replace("']", "").replace(
+                            "', '", "<br>"))
+                    app.logger.debug('%s logged in successfully', firstLogin['username'])
+                    return  indexPostPage[0]
+                else:
+                    app.logger.debug('%s logged in successfully', firstLogin['username'])
+                    return initIndexPostPage.format("", firstLogin['name'], firstLogin['address'],
+                                                 boxPostMem, "").replace("\\n", "").replace("['", "").replace("']", "").replace(
+                            "', '", "<br>")
+                app.logger.debug('%s failed to log in', firstLogin['password'])
+                return loginFailPage.format('wrong username or password')
+            else:
+                if(roundLogin==[]):
+                    roundLogin.append(1)
+                else:
+                    roundLogin.append(roundLogin[0]+1)
+                    roundLogin.pop(0)
+                if(roundLogin[0]==3):
+                    return 'sorry you cursious'
+                if(tempSecurityLogin!=[]):
+                    if(tempSecurityLogin[0]==request.form['username']):
+                        roundLogin.append(roundLogin[0]+1)
+                        roundLogin.pop(0)
+                        app.logger.warning('%s warning enemy hacked username round : ',i)
                     else:
-                        return initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
-                                                     "", "").replace("\\n", "").replace("['", "").replace("']", "").replace(
-                                "', '", "<br>")
-            return loginFailPage.format('wrong username or password')
+                        tempSecurityLogin.pop(0)
+                        roundLogin.pop(0)
+                else:
+                    tempSecurityLogin.append(request.form['username'])
         else:
             if(username==''):
+                app.logger.debug('%s failed to log in', username)
                 return loginFailPage.format('username is missing')
             if(password==''):
+                app.logger.debug('%s failed to log in', username)
                 return loginFailPage.format('password is missing')
-            return loginFailPage
+        app.logger.debug('%s failed to log in', username)
+        return loginFailPage.format('failed login')
     else:
         if indexPostPage != []:
+            app.logger.debug('%s failed to log in', firstLogin['username'])
             indexPostPage.pop(0)
             indexPostPage.append(
-                initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
+                initIndexPostPage.format("", firstLogin['name'], firstLogin['address'],
                                          boxPostMem, "").replace("\\n", "").replace("['", "").replace("']", "").replace(
                     "', '", "<br>"))
 
             return indexPostPage[0]
         else:
-            return initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
+            app.logger.debug('%s failed to log in', firstLogin['username'])
+            return initIndexPostPage.format("", firstLogin['name'], firstLogin['address'],
                                             "", "").replace("\\n", "").replace("['", "").replace("']", "").replace(
                 "', '", "<br>")
+
+    # if (request.method == 'POST'):
+    #     username = request.form['username']
+    #     password = request.form['password']
+    #     if(username!=''
+    #             and username!= None
+    #             and password!=''
+    #             and password!= None):
+    #         for x in authenMemory:
+    #             if(x.get('username')==username and x.get('password')==password):
+    #                 authenNowMemory.append(x)
+    #                 if indexPostPage != []:
+    #                     indexPostPage.pop(0)
+    #                     indexPostPage.append(
+    #                         initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
+    #                                                  boxPostMem, "").replace("\\n", "").replace("['", "").replace("']", "").replace(
+    #                             "', '", "<br>"))
+    #
+    #                     app.logger.info('%s logged in successfully', username)
+    #                     return  indexPostPage[0]
+    #                 else:
+    #                     app.logger.info('%s logged in successfully', username)
+    #                     return initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
+    #                                                  "", "").replace("\\n", "").replace("['", "").replace("']", "").replace(
+    #                             "', '", "<br>")
+    #         app.logger.info('%s failed to log in', username)
+    #         return loginFailPage.format('wrong username or password')
+    #     else:
+    #         if(username==''):
+    #             app.logger.info('%s failed to log in', username)
+    #             return loginFailPage.format('username is missing')
+    #         if(password==''):
+    #             app.logger.info('%s failed to log in', username)
+    #             return loginFailPage.format('password is missing')
+    #         app.logger.info('%s failed to log in', username)
+    #         return loginFailPage
+    # else:
+    #     if indexPostPage != []:
+    #         indexPostPage.pop(0)
+    #         indexPostPage.append(
+    #             initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
+    #                                      boxPostMem, "").replace("\\n", "").replace("['", "").replace("']", "").replace(
+    #                 "', '", "<br>"))
+    #
+    #         return indexPostPage[0]
+    #     else:
+    #         return initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'],
+    #                                         "", "").replace("\\n", "").replace("['", "").replace("']", "").replace(
+    #             "', '", "<br>")
 
 @app.route("/about", methods=['GET'])
 def about():
@@ -413,6 +527,16 @@ def register():
                                                'password': request.form['password'],
                                                  'name': request.form['name'],
                                                  'address': request.form['address']})
+
+                                hashedPass = bcrypt.hashpw(request.form['password'].encode(), salt)
+                                postDb = {
+                                    'username': request.form['username'],
+                                    'password': hashedPass,
+                                    'name': request.form['name'],
+                                    'address': request.form['address']
+                                }
+                                app.logger.debug('%s register in successfully', postDb)
+                                authen.insert_one(postDb)
                                 return render_template("login.html")
                             else:
                                 return registerFailPage.format("password don't match confirm password")
@@ -431,14 +555,30 @@ def register():
 
 @app.route("/postText", methods=['POST'])
 def postText():
-    name = request.form['name'].encode('utf-8')
-    cost = request.form['cost'].encode('utf-8')
-    telephone = request.form['telephone'].encode('utf-8')
-    email = request.form['email'].encode('utf-8')
-    data = request.form['message'].encode('utf-8')
-    boxPostMem.append(boxPost.format(imageMem[0], name, cost, data, telephone, email, name))
-    sellMem.append("<tr><td>"+name+"</td></tr>")
-    postMemory.append(data)
+    name = authenNowMemory[0]['name']
+    nameProd = request.form['name']
+    costProd = request.form['cost']
+    telephoneProd = request.form['telephone']
+    emailProd = request.form['email']
+    dataProd = request.form['message']
+    productDB = {
+        'nameProd': nameProd,
+        'costProd': costProd,
+        'telephoneProd': telephoneProd,
+        'emailProd': emailProd,
+        'dataProd': dataProd,
+        'imgProd': imageMem[0],
+        'name': authenNowMemory[0]['name']
+    }
+    app.logger.debug('%s post product in successfully by :',authenNowMemory[0]['name'],'| resource : ', productDB)
+    product.insert_one(productDB)
+
+    boxPostMem.append(boxPost.format(imageMem[0], nameProd, costProd, dataProd, telephoneProd, emailProd, name))
+    # for x in product.find_one({}):
+
+    sellMem.append("<tr><td>"+nameProd+"</td></tr>")
+    postMemory.append(dataProd)
+
     # 1.successUpload 2.user 3.boxPost
     if indexPostPage != []:
         indexPostPage.pop(0)
@@ -463,6 +603,7 @@ def upload_file():
                     initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'], boxPostMem, "No file part").replace("\\n", "").replace("['",
                                                                                                             "").replace(
                         "']", "").replace("', '", "<br>"))
+            app.logger.error('%s upload image in failled by', authenNowMemory[0]['name'])
             return indexPostPage[0]
         file = request.files['file']
         # if user does not select file, browser also
@@ -479,10 +620,12 @@ def upload_file():
                     initIndexPostPage.format("No selected file",authenNowMemory[0]['name'], authenNowMemory[0]['address'], boxPostMem, "").replace("\\n", "").replace("['",
                                                                                                             "").replace(
                         "']", "").replace("', '", "<br>"))
+            app.logger.error('%s upload image in failled by', authenNowMemory[0]['name'])
             return indexPostPage[0]
         if file and allowed_file(file.filename):
             print('isPath')
             filename = secure_filename(file.filename)
+
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             if imageMem != []:
                 imageMem.pop(0)
@@ -500,16 +643,31 @@ def upload_file():
                     initIndexPostPage.format("", authenNowMemory[0]['name'], authenNowMemory[0]['address'], boxPostMem,"success").replace("\\n", "").replace("['",
                                                                                                             "").replace(
                         "']", "").replace("', '", "<br>"))
+            app.logger.error('%s upload image in successfully by', authenNowMemory[0]['name'], ' | resource : ', imageMem[0])
             return indexPostPage[0]
     return ""
 
 
 
 if __name__ == "__main__":
-
     files = os.listdir(UPLOAD_FOLDER)
-    #---Clear mem---
-    for name in files:
-        os.remove(UPLOAD_FOLDER+"/"+name)
 
+    cclient = MongoClient()
+    client = MongoClient('localhost', 27017)
+    client = MongoClient('mongodb://localhost:27017')
+    db = client.webserver
+    authen = db.authen
+    product = db.product
+    # salt = bcrypt.gensalt()
+    # hash = bcrypt.hashpw('1234'.encode(), salt)
+    # print(hash == bcrypt.hashpw('1234'.encode(), salt))
+    # print(bcrypt.checkpw('1234'.encode(),hash))
+    logging.basicConfig(filename='log/log.log',level=logging.DEBUG)
+    app.logger.info('%s database connected : mongodb://localhost:27017')
+    for x in product.find({}):
+        boxPostMem.append(boxPost.format(x['imgProd'], x['nameProd'], x['costProd'], x['dataProd'], x['telephoneProd'], x['emailProd'], x['name']))
+    #---Clear mem---
+    # for name in files:
+    #     os.remove(UPLOAD_FOLDER+"/"+name)
+    app.logger.info('%s inital query database success')
     app.run(debug=True, host="0.0.0.0", port=9000)
